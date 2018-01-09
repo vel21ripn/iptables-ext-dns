@@ -35,10 +35,31 @@ autom4te.cache
 extensions/xtables
 extensions/.tmp_versions/
 extensions/.*.cmd
+extensions/Makefile
+extensions/Makefile.in
 
+include/Makefile
 include/autoconfig.h
 include/autoconfig.h.in
 modules/kernel.h
+modules/Makefile
+modules/.tmp_versions/
+modules/.xt_dns.ko.cmd
+modules/.xt_dns.mod.o.cmd
+modules/.xt_dns.o.cmd
+modules/Module.symvers
+modules/modules.order
+modules/xt_dns.mod.c
+
+test/Makefile
+test/Makefile.in
+test/common/Makefile
+test/common/Makefile.in
+test/ipv4/Makefile
+test/ipv4/Makefile.in
+test/ipv6/Makefile
+test/ipv6/Makefile.in
+
 
 .deps
 .libs

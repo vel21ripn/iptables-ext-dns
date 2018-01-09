@@ -1,3 +1,5 @@
+
+BUILD_DIR = @KBUILDDIR@
 all: kernel.h
 	
 kernel.h: kernel.sh

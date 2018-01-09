@@ -8,6 +8,9 @@ m4_define([VERSION_MICRO],[1])
 AC_INIT(iptables-ext-dns,m4_defn([VERSION_MAJOR]).m4_defn([VERSION_MINOR]).m4_defn([VERSION_MICRO]), mimuret@gmail.com, iptables-ext-dns)
 AC_SUBST(VERSION_INFO, [VERSION_MAJOR:VERSION_MINOR:VERSION_MICRO])
 
+AC_DISABLE_STATIC
+AC_ENABLE_SHARED
+
 AC_CONFIG_AUX_DIR(misc)
 AM_INIT_AUTOMAKE([foreign])
 AC_CONFIG_SRCDIR([extensions/libxt_dns.c])
@@ -31,6 +34,26 @@ AC_HEADER_STDBOOL
 # Checks for library functions.
 AC_CHECK_FUNCS([strcasecmp strdup])
 
+AC_ARG_WITH([kbuild],
+        AS_HELP_STRING([--with-kbuild=PATH],
+        [Path to kernel build directory [[/lib/modules/CURRENT/build]]]),
+        [KBUILDDIR="$withval"])
+
+AM_CONDITIONAL(WITH_KBUILDDIR, test "$KBUILDDIR" != "")
+AC_SUBST(KBUILDDIR)
+
+PKG_PROG_PKG_CONFIG([0.25])
+PKG_CHECK_MODULES([XTABLES],[xtables],
+	[ac_xtables_xtdir=`$PKG_CONFIG --variable=xtlibdir xtables`],
+	[ac_xtables_xtdir="${libdir}/xtables";])
+
+AC_ARG_WITH([xtlibdir],
+        AS_HELP_STRING([--with-xtlibdir=PATH],
+        [Path where to install Xtables extensions [[LIBEXECDIR/xtables]]]),
+        [xtlibdir="$withval"],
+        [xtlibdir="$ac_xtables_xtdir"])
+
+AC_SUBST(libdir,$xtlibdir)
 
 AC_ARG_ENABLE(debug, [  --enable-debug trun on debugging [default no]],,enable_debug=no)
 AC_MSG_CHECKING(whether to enable debuging)
@@ -53,9 +76,9 @@ else
    AC_SUBST(RUN_TESTS, ["common ipv4"])
 fi
 
-AC_CHECK_FILE([/etc/redhat-release],[AC_SUBST(libdir,[/lib64])],[])
-AC_CHECK_FILE([/etc/debian_version],[AC_SUBST(libdir,[/lib])],[])
+#AC_CHECK_FILE([/etc/redhat-release],[AC_SUBST(libdir,[/lib64])],[])
+#AC_CHECK_FILE([/etc/debian_version],[AC_SUBST(libdir,[/lib])],[])
 
-AC_CONFIG_FILES([Makefile extensions/Makefile test/Makefile test/common/Makefile test/ipv4/Makefile test/ipv6/Makefile iptables-ext-dns.spec])
+AC_CONFIG_FILES([Makefile modules/Makefile extensions/Makefile include/Makefile test/Makefile test/common/Makefile test/ipv4/Makefile test/ipv6/Makefile iptables-ext-dns.spec])
 LT_INIT
 AC_OUTPUT
