@@ -182,8 +182,8 @@ static bool dns_mt_tcp(const struct sk_buff *skb, XT_PARAM *par,
         HOTDROP(par);
         return false;
     }
-    if (!(th->ack & th->psh) || (th->dest != htons(DNS_PORT))) {
-        DEBUG_PRINT("not dns packet");
+    if (!(th->ack & th->psh) || (th->dest != htons(DNS_PORT) && th->source != htons(DNS_PORT))) {
+        DEBUG_PRINT("not dns packet port");
         return false;
     }
 
@@ -203,8 +203,8 @@ static bool dns_mt_udp(const struct sk_buff *skb, XT_PARAM *par,
         HOTDROP(par);
         return false;
     }
-    if (uh->dest != htons(DNS_PORT)) {
-        DEBUG_PRINT("not dns packet");
+    if (uh->dest != htons(DNS_PORT) && uh->source != htons(DNS_PORT)) {
+        DEBUG_PRINT("not dns packet port");
         return false;
     }
 
@@ -290,13 +290,15 @@ static struct xt_match dns_mt_reg[] __read_mostly = {
      .match = dns_mt4,
      .matchsize = sizeof(struct xt_dns),
      .me = THIS_MODULE,
-     .hooks = (1 << NF_INET_LOCAL_IN) | (1 << NF_INET_PRE_ROUTING)},
+     .hooks = (1 << NF_INET_LOCAL_IN)  | (1 << NF_INET_PRE_ROUTING) | 
+	      (1 << NF_INET_LOCAL_OUT) | (1 << NF_INET_FORWARD)},
     {.name = "dns",
      .family = NFPROTO_IPV6,
      .match = dns_mt6,
      .matchsize = sizeof(struct xt_dns),
      .me = THIS_MODULE,
-     .hooks = (1 << NF_INET_LOCAL_IN) | (1 << NF_INET_PRE_ROUTING)}};
+     .hooks = (1 << NF_INET_LOCAL_IN) | (1 << NF_INET_PRE_ROUTING) |
+    	      (1 << NF_INET_LOCAL_OUT) | (1 << NF_INET_FORWARD)}};
 static int __init dns_mt_init(void) {
     return xt_register_matches(dns_mt_reg, ARRAY_SIZE(dns_mt_reg));
 }

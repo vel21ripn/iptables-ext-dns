@@ -55,11 +55,26 @@ static const struct option dns_opts[] = {
     {.name = NULL, .has_arg = false},
 };
 
+static char *join_names(const struct dns_flag_names *list,char *buf,size_t len) {
+size_t l;
+*buf = '\0';
+for(l = 0;list->name && l < len-1; list++) {
+	l += snprintf(&buf[l],len - l - 1,"%s%s",l ? ",":"",list->name);
+}
+return buf;
+}
+
 static void dns_help(void) {
+    char opcodes[64],rcodes[256],qtypes[512];
+    join_names(&dns_flag_opcode[0],opcodes,sizeof(opcodes)-1);
+    join_names(&dns_flag_rcode[0],rcodes,sizeof(rcodes)-1);
+    join_names(&dns_flag_qtype[0],qtypes,sizeof(qtypes)-1);
     printf("dns match options:\n"
            "[!] --qr match when response\n"
            "[!] --opcode match\n"
-           "      (Flags QUERY,IQUERY,STATUS,NOTIFY,UPDATE)\n"
+           "      (Flags %s)\n"
+           "[!] --rcode match\n"
+           "      (Flags %s)\n"
            "[!] --aa match when Authoritative Answer\n"
            "[!] --tc match when Truncated Response\n"
            "[!] --rd match when Recursion Desired\n"
@@ -69,11 +84,11 @@ static void dns_help(void) {
            "[!] --qname\n"
            "    --rmatch set qname match mode to reverse matching flag\n"
            "[!] --qtype\n"
-           "      (Flags ex. A,AAAA,MX,NS,TXT,SOA... )\n"
+           "      (Flags %s)\n"
            "	see. "
            "http://www.iana.org/assignments/dns-parameters/"
            "dns-parameters.xhtml\n"
-           "[!] --maxsize qname max size \n");
+           "[!] --maxsize qname max size \n",opcodes,rcodes,qtypes);
 }
 
 static void dns_init(struct xt_entry_match *m) {
